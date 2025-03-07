@@ -1,0 +1,59 @@
+{
+  "tables": [
+    {
+      "name": "User",
+      "columns": [
+        {
+          "name": "id",
+          "type": "number",
+          "isNullable": false
+        },
+        {
+          "name": "name",
+          "type": "string",
+          "isNullable": false
+        },
+        {
+          "name": "email",
+          "type": "string",
+          "isNullable": false
+        },
+        {
+          "name": "createdAt",
+          "type": "Date",
+          "isNullable": false
+        },
+        {
+          "name": "isActive",
+          "type": "boolean",
+          "isNullable": true
+        }
+      ]
+    },
+    {
+      "name": "Post",
+      "columns": [
+        {
+          "name": "id",
+          "type": "number",
+          "isNullable": false
+        },
+        {
+          "name": "title",
+          "type": "string",
+          "isNullable": false
+        },
+        {
+          "name": "content",
+          "type": "string",
+          "isNullable": false
+        },
+        {
+          "name": "authorId",
+          "type": "number",
+          "isNullable": false
+        }
+      ]
+    }
+  ]
+}
