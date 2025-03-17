@@ -12,6 +12,7 @@ export interface ColorNodeData {
   id: number;
   label: string;
   color?: string;
+
   columns: string[];
   hasRelation: boolean;
   [key: string]: unknown; // Add index signature to satisfy Record<string, unknown>
@@ -26,6 +27,7 @@ export interface AppState {
   nodes: AppNode[];
   edges: Edge[];
   code: string;
+  isEnum?: boolean;
   onNodesChange: (changes: NodeChange[]) => void;
   onEdgesChange: (changes: EdgeChange[]) => void;
   onConnect: (connection: Connection) => void;

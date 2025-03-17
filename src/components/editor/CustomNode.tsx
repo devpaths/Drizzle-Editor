@@ -14,46 +14,107 @@ function ColorChooserNode({ id, data }: NodeProps<ColorNode>) {
 
   const handleLabelChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newLabel = e.target.value;
-
-    // Update the node in the store
     updateNode(id, { label: newLabel });
-
-    // Update local state directly
     setNodeData((prev) => ({ ...prev, label: newLabel }));
-
-    // Update code from nodes
     updateCodeFromNodes();
   };
 
-  // Parse column string into name and definition parts
   const parseColumnString = (colString: string) => {
-    const match = colString.match(/^([a-zA-Z0-9_]+)\s+(.+)$/);
+    const match = colString?.match(/^([a-zA-Z0-9_]+)\s+(.+)$/);
     return match
       ? { name: match[1], definition: match[2] }
-      : { name: "", definition: colString };
+      : { name: "", definition: colString || "" };
   };
 
   const handleColumnChange = (index: number, value: string) => {
-    const updatedColumns = [...nodeData.columns];
+    const updatedColumns = [...(nodeData.columns || [])];
     updatedColumns[index] = value;
-
-    // Update the node in the store
     updateNode(id, { columns: updatedColumns });
-
-    // Update local state directly
     setNodeData((prev) => ({ ...prev, columns: updatedColumns }));
-
-    // Call updateCodeFromNodes separately to allow batching updates
     setTimeout(() => {
       updateCodeFromNodes();
     }, 0);
   };
 
-  // Save button to trigger code update after all changes
-  const saveChanges = () => {
-    updateCodeFromNodes();
+  const handleEnumValueChange = (index: number, value: string) => {
+    const updatedValues = [...(nodeData.values || [])];
+    updatedValues[index] = value;
+    updateNode(id, { values: updatedValues });
+    setNodeData((prev) => ({ ...prev, values: updatedValues }));
+    setTimeout(() => {
+      updateCodeFromNodes();
+    }, 0);
   };
 
+  // Render based on node type
+  if (nodeData.isEnum) {
+    return (
+      <div
+        style={{
+          padding: "10px",
+          background: "#F0F8FF", // Light blue background for enums
+          border: "1px solid #4682B4",
+          borderRadius: "5px",
+          minWidth: "180px",
+          boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+        }}
+      >
+        <div
+          style={{
+            fontWeight: "bold",
+            marginBottom: "8px",
+            backgroundColor: "#4682B4",
+            padding: "4px 8px",
+            color: "white",
+            borderRadius: "3px",
+          }}
+        >
+          ENUM: {nodeData.label || ""}
+        </div>
+
+        <div
+          style={{ fontSize: "12px", marginBottom: "5px", fontWeight: "bold" }}
+        >
+          Values:
+        </div>
+        <ul
+          style={{
+            listStyleType: "none",
+            padding: "5px",
+            margin: 0,
+            border: "1px solid #E0E0E0",
+            borderRadius: "3px",
+            backgroundColor: "white",
+          }}
+        >
+          {Array.isArray(nodeData.values) && nodeData.values.length > 0 ? (
+            nodeData.values.map((value: string, index: number) => (
+              <li
+                key={index}
+                style={{
+                  margin: "3px 0",
+                  padding: "3px 6px",
+                  backgroundColor: "#F5F5F5",
+                  borderRadius: "2px",
+                  fontFamily: "monospace",
+                  fontSize: "12px",
+                }}
+              >
+                {value}
+              </li>
+            ))
+          ) : (
+            <li style={{ color: "#999", padding: "5px" }}>No values defined</li>
+          )}
+        </ul>
+
+        <Handle type="source" position={Position.Right} id="right" />
+        <Handle type="target" position={Position.Left} id="left" />
+      </div>
+    );
+  }
+
+  // Regular table node rendering
   return (
     <div
       style={{
@@ -66,14 +127,14 @@ function ColorChooserNode({ id, data }: NodeProps<ColorNode>) {
     >
       <input
         type="text"
-        value={nodeData.label}
+        value={nodeData.label || ""}
         onChange={handleLabelChange}
         style={{ width: "100%", marginBottom: "5px", fontWeight: "bold" }}
         placeholder="Table Name"
       />
 
       <ul style={{ listStyleType: "none", padding: 0, margin: 0 }}>
-        {nodeData.columns?.map((col: string, index: number) => {
+        {(nodeData.columns || []).map((col: string, index: number) => {
           const { name, definition } = parseColumnString(col);
 
           return (
@@ -106,28 +167,10 @@ function ColorChooserNode({ id, data }: NodeProps<ColorNode>) {
         })}
       </ul>
 
-      {/* Add a save button to trigger code update after all changes */}
-      {/* <button
-        onClick={saveChanges}
-        style={{
-          marginTop: "10px",
-          padding: "5px 10px",
-          backgroundColor: "#4CAF50",
-          color: "white",
-          border: "none",
-          borderRadius: "4px",
-          cursor: "pointer",
-        }}
-      >
-        Save Changes
-      </button> */}
-
-      {/* Debug info */}
       <div style={{ fontSize: "10px", marginTop: "5px", color: "#666" }}>
         Relations: {nodeData.hasRelation ? "Yes" : "No"}
       </div>
 
-      {/* Always render the handles, regardless of hasRelation */}
       <Handle type="source" position={Position.Right} id="right" />
       <Handle type="target" position={Position.Left} id="left" />
     </div>

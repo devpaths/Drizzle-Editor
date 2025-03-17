@@ -44,7 +44,6 @@ function generateCodeFromNodes(nodes: AppNode[], originalCode: string): string {
     overwrite: true,
   });
 
-  // First, update the table definitions
   nodes.forEach((node) => {
     if (!isColorChooserNode(node)) return;
 
@@ -67,62 +66,68 @@ function generateCodeFromNodes(nodes: AppNode[], originalCode: string): string {
           const columnsObj = descendant.getArguments()[1];
 
           if (Node.isObjectLiteralExpression(columnsObj)) {
-            const properties = columnsObj.getProperties();
+            const existingProperties = columnsObj.getProperties();
             const existingColumnNames = new Set<string>();
+            const columnsMap = new Map<string, string>();
+            const orderedColumns: string[] = [];
 
+            // Step 1: Build a map of column names to their definitions from the node data
             node.data.columns.forEach((columnStr) => {
               const { name, definition } = parseColumnString(columnStr);
               if (!name) return;
 
-              const cleanedDefinition = cleanColumnDefinition(definition);
+              columnsMap.set(name, cleanColumnDefinition(definition));
+              orderedColumns.push(name);
               existingColumnNames.add(name);
-
-              const property = properties.find(
-                (p) => Node.isPropertyAssignment(p) && p.getName() === name,
-              );
-
-              if (property && Node.isPropertyAssignment(property)) {
-                try {
-                  // Preserve references to other tables by checking if the definition contains 'references'
-                  if (
-                    definition.includes("references") &&
-                    property.getInitializer().getText().includes("references")
-                  ) {
-                    // Don't modify the reference part
-                    return;
-                  }
-                  property.setInitializer(cleanedDefinition);
-                } catch (error) {
-                  console.error(
-                    `Failed to update column definition for ${name}:`,
-                    error,
-                  );
-                }
-              } else {
-                try {
-                  columnsObj.addPropertyAssignment({
-                    name,
-                    initializer: cleanedDefinition,
-                  });
-                } catch (error) {
-                  console.error(`Failed to add new column ${name}:`, error);
-                }
-              }
             });
 
-            // Only remove properties that are not references and not in the current columns
-            properties.forEach((property) => {
-              if (Node.isPropertyAssignment(property)) {
-                const propName = property.getName();
-                const propText = property.getInitializer().getText();
+            // Step 2: Create a new object literal text representation
+            let newColumnsText = "{\n";
+
+            // Step 3: Add properties to the new object in the order they appear in the node data
+            for (const columnName of orderedColumns) {
+              const columnDef = columnsMap.get(columnName);
+              if (columnDef) {
+                // Check if the column already exists and contains a reference
+                const existingProp = existingProperties.find(
+                  (p) =>
+                    Node.isPropertyAssignment(p) && p.getName() === columnName,
+                );
+
+                if (existingProp && Node.isPropertyAssignment(existingProp)) {
+                  const existingText = existingProp.getInitializer().getText();
+                  if (existingText.includes("references")) {
+                    // Preserve the reference by keeping the original definition
+                    newColumnsText += `  ${columnName}: ${existingText},\n`;
+                    continue;
+                  }
+                }
+
+                // Add the new or updated property
+                newColumnsText += `  ${columnName}: ${columnDef},\n`;
+              }
+            }
+
+            // Step 4: Add properties that exist in the original code but not in the node data
+            // (particularly important for relationships)
+            for (const prop of existingProperties) {
+              if (Node.isPropertyAssignment(prop)) {
+                const propName = prop.getName();
+                const propText = prop.getInitializer().getText();
+
                 if (
                   !existingColumnNames.has(propName) &&
-                  !propText.includes("references")
+                  propText.includes("references")
                 ) {
-                  property.remove();
+                  newColumnsText += `  ${propName}: ${propText},\n`;
                 }
               }
-            });
+            }
+
+            newColumnsText += "}";
+
+            // Step 5: Replace the old object with the new one
+            columnsObj.replaceWithText(newColumnsText);
           }
         }
       }
