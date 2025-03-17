@@ -31,6 +31,31 @@
       ]
     },
     {
+      "name": "Devang",
+      "columns": [
+        {
+          "name": "id",
+          "type": "1",
+          "isNullable": false
+        },
+        {
+          "name": "name",
+          "type": "\"Devang\"",
+          "isNullable": false
+        },
+        {
+          "name": "email",
+          "type": "\"devang@gmail.com\"",
+          "isNullable": false
+        },
+        {
+          "name": "createdAt",
+          "type": "\"2023-08-01T00:00:00.000Z\"",
+          "isNullable": false
+        }
+      ]
+    },
+    {
       "name": "Post",
       "columns": [
         {
@@ -55,5 +80,6 @@
         }
       ]
     }
-  ]
+  ],
+  "relations": []
 }
