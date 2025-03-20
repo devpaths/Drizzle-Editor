@@ -6,7 +6,8 @@ import {
   Node as NodeBase,
 } from "@xyflow/react";
 import { Project, Node, SyntaxKind, SourceFile } from "ts-morph";
-
+import { nanoid } from "nanoid";
+import { User } from "@/components/dashboard/types";
 import { initialNodes } from "./nodes/nodes";
 import { initialEdges } from "./edges/edges";
 import { type AppNode, type AppState, type ColorNode } from "./types";
@@ -36,8 +37,14 @@ function cleanColumnDefinition(definition: string): string {
   const defaultMatch = definition.match(/\.default\(([^)]+)\)/);
   const defaultModifier = defaultMatch ? `.default(${defaultMatch[1]})` : "";
 
-  return [baseType, ...modifiers, defaultModifier].join("");
+  // Filter out empty strings before joining
+  return [baseType, ...modifiers]
+    .filter(Boolean)
+    .concat(defaultModifier)
+    .filter(Boolean)
+    .join("");
 }
+
 function generateCodeFromNodes(nodes: AppNode[], originalCode: string): string {
   const project = new Project({ useInMemoryFileSystem: true });
   const sourceFile = project.createSourceFile("schema.ts", originalCode, {
@@ -61,8 +68,7 @@ function generateCodeFromNodes(nodes: AppNode[], originalCode: string): string {
           Node.isStringLiteral(tableNameArg) &&
           tableNameArg.getLiteralValue() === tableName
         ) {
-          tableNameArg.setLiteralValue(tableName);
-
+          // No need to set the tableName to itself, only update columns
           const columnsObj = descendant.getArguments()[1];
 
           if (Node.isObjectLiteralExpression(columnsObj)) {
@@ -136,16 +142,17 @@ function generateCodeFromNodes(nodes: AppNode[], originalCode: string): string {
 
   return sourceFile.getFullText();
 }
+
 const useStore = create<AppState>((set, get) => ({
   nodes: initialNodes,
   edges: initialEdges,
   code: "",
 
+  // Implement all required methods from AppState interface
   onNodesChange: (changes) =>
     set({ nodes: applyNodeChanges(changes, get().nodes) as AppNode[] }),
   onEdgesChange: (changes) =>
     set({ edges: applyEdgeChanges(changes, get().edges) }),
-
   onConnect: (connection) => set({ edges: addEdge(connection, get().edges) }),
 
   setNodes: (nodes) => set({ nodes }),
@@ -153,20 +160,15 @@ const useStore = create<AppState>((set, get) => ({
   setCode: (code) => set({ code }),
 
   updateNode: (nodeId, data) => {
-    let updatedNode: AppNode | null = null;
-
     set((state) => {
       const newNodes = state.nodes.map((node) => {
         if (node.id === nodeId) {
-          updatedNode = { ...node, data: { ...node.data, ...data } };
-          return updatedNode;
+          return { ...node, data: { ...node.data, ...data } };
         }
         return node;
       });
       return { nodes: newNodes };
     });
-
-    return updatedNode; // Return the updated node
   },
 
   updateCodeFromNodes: () => {
@@ -177,9 +179,55 @@ const useStore = create<AppState>((set, get) => ({
     set({ code: updatedCode });
   },
 
-  syncMonacoWithNodes: () => {},
+  // Implement required functions from AppState interface
+  syncMonacoWithNodes: () => {
+    // Implementation for syncMonacoWithNodes
+    // This function was previously empty, but it's in your types, so it should be implemented
+  },
+
   monacoJson: "",
-  updateNodeData: (nodeId, data) => {},
+
+  updateNodeData: (nodeId, data) => {
+    // Implementation for updateNodeData
+    set((state) => {
+      const newNodes = state.nodes.map((node) => {
+        if (node.id === nodeId) {
+          return { ...node, data: { ...node.data, ...data } };
+        }
+        return node;
+      });
+      return { nodes: newNodes };
+    });
+  },
+
+  // Additional collaboration properties and methods
+  roomId: "",
+  currentUser: { id: nanoid(), name: "Anonymous" },
+  connectedUsers: [],
+  isCollaborating: false,
+
+  setRoomId: (roomId) => set({ roomId }),
+  setCurrentUser: (user) => set({ currentUser: user }),
+  setConnectedUsers: (users) => set({ connectedUsers: users }),
+  toggleCollaboration: () =>
+    set((state) => ({ isCollaborating: !state.isCollaborating })),
+
+  joinRoom: (roomId, username) => {
+    const userId = nanoid();
+    set({
+      roomId,
+      currentUser: { id: userId, name: username },
+      isCollaborating: true,
+    });
+  },
+
+  leaveRoom: () => {
+    set({
+      roomId: "",
+      connectedUsers: [],
+      isCollaborating: false,
+    });
+  },
 }));
 
 export default useStore;

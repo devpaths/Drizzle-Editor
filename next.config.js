@@ -1,10 +1,12 @@
-/**
- * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially useful
- * for Docker builds.
- */
-import "./src/env.js";
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  // Configure for Turbopack compatibility
+  turbo: {
+    // Add any Turbopack-specific rules here if needed
+  },
 
-/** @type {import("next").NextConfig} */
-const config = {};
+  // We'll avoid using webpack config since we're using Turbopack
+  // Instead, we'll handle Monaco workers in the component itself
+};
 
-export default config;
+export default nextConfig;

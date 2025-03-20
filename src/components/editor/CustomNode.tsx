@@ -3,11 +3,39 @@ import { Handle, Position, NodeProps } from "@xyflow/react";
 import useStore from "./store";
 import { ColorNode } from "./types";
 
+// Import shadcn UI components
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { Label } from "@/components/ui/label";
+import { Separator } from "@/components/ui/separator";
+import { ScrollArea } from "@/components/ui/scroll-area";
+
+// Custom handle styles based on type with gray color scheme
+const SourceHandle = ({ position, id }: { position: Position; id: string }) => (
+  <Handle
+    type="source"
+    position={position}
+    id={id}
+    className="!z-10 !h-5 !w-5 !border-2 !border-gray-600 !bg-gray-400 !shadow-md !transition-colors hover:!bg-gray-500"
+    style={{ right: -10 }} // Position adjustment for better visibility
+  />
+);
+
+const TargetHandle = ({ position, id }: { position: Position; id: string }) => (
+  <Handle
+    type="target"
+    position={position}
+    id={id}
+    className="!z-10 !h-5 !w-5 !border-2 !border-gray-600 !bg-gray-400 !shadow-md !transition-colors hover:!bg-gray-500"
+    style={{ left: -10 }} // Position adjustment for better visibility
+  />
+);
+
 function ColorChooserNode({ id, data }: NodeProps<ColorNode>) {
   const { updateNode, updateCodeFromNodes } = useStore();
   const [nodeData, setNodeData] = useState(data);
 
-  // Make sure local state is updated when props change
   useEffect(() => {
     setNodeData(data);
   }, [data]);
@@ -36,111 +64,69 @@ function ColorChooserNode({ id, data }: NodeProps<ColorNode>) {
     }, 0);
   };
 
-  const handleEnumValueChange = (index: number, value: string) => {
-    const updatedValues = [...(nodeData.values || [])];
-    updatedValues[index] = value;
-    updateNode(id, { values: updatedValues });
-    setNodeData((prev) => ({ ...prev, values: updatedValues }));
-    setTimeout(() => {
-      updateCodeFromNodes();
-    }, 0);
-  };
-
-  // Render based on node type
   if (nodeData.isEnum) {
     return (
-      <div
-        style={{
-          padding: "10px",
-          background: "#F0F8FF", // Light blue background for enums
-          border: "1px solid #4682B4",
-          borderRadius: "5px",
-          minWidth: "180px",
-          boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
-        }}
-      >
-        <div
-          style={{
-            fontWeight: "bold",
-            marginBottom: "8px",
-            backgroundColor: "#4682B4",
-            padding: "4px 8px",
-            color: "white",
-            borderRadius: "3px",
-          }}
-        >
-          ENUM: {nodeData.label || ""}
-        </div>
+      <Card className="min-w-48 border-2 border-gray-600 shadow-lg dark:border-gray-500 dark:bg-gray-900 dark:text-gray-300">
+        <CardHeader className="rounded-t-md bg-gray-200 p-2 dark:bg-gray-800">
+          <CardTitle className="text-lg font-bold text-gray-800 dark:text-gray-100">
+            ENUM: {nodeData.label || ""}
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="p-3">
+          <Label className="text-base font-bold text-gray-700 dark:text-gray-200">
+            Values:
+          </Label>
 
-        <div
-          style={{ fontSize: "12px", marginBottom: "5px", fontWeight: "bold" }}
-        >
-          Values:
-        </div>
-        <ul
-          style={{
-            listStyleType: "none",
-            padding: "5px",
-            margin: 0,
-            border: "1px solid #E0E0E0",
-            borderRadius: "3px",
-            backgroundColor: "white",
-          }}
-        >
-          {Array.isArray(nodeData.values) && nodeData.values.length > 0 ? (
-            nodeData.values.map((value: string, index: number) => (
-              <li
-                key={index}
-                style={{
-                  margin: "3px 0",
-                  padding: "3px 6px",
-                  backgroundColor: "#F5F5F5",
-                  borderRadius: "2px",
-                  fontFamily: "monospace",
-                  fontSize: "12px",
-                }}
-              >
-                {value}
-              </li>
-            ))
-          ) : (
-            <li style={{ color: "#999", padding: "5px" }}>No values defined</li>
-          )}
-        </ul>
+          <ScrollArea className="mt-2 h-32 rounded-md border bg-gray-100 p-2 dark:border-gray-700 dark:bg-gray-800">
+            {Array.isArray(nodeData.values) && nodeData.values.length > 0 ? (
+              <div className="space-y-2">
+                {nodeData.values.map((value: string, index: number) => (
+                  <Badge
+                    key={index}
+                    variant="secondary"
+                    className="w-full justify-start bg-gray-200 font-mono text-base text-gray-800 dark:bg-gray-700 dark:text-gray-200"
+                  >
+                    {value}
+                  </Badge>
+                ))}
+              </div>
+            ) : (
+              <p className="p-1 text-base text-gray-500 dark:text-gray-400">
+                No values defined
+              </p>
+            )}
+          </ScrollArea>
+        </CardContent>
 
-        <Handle type="source" position={Position.Right} id="right" />
-        <Handle type="target" position={Position.Left} id="left" />
-      </div>
+        {/* Enhanced Handles with different visuals */}
+        <SourceHandle position={Position.Right} id="right" />
+        <TargetHandle position={Position.Left} id="left" />
+      </Card>
     );
   }
 
-  // Regular table node rendering
   return (
-    <div
-      style={{
-        padding: "10px",
-        background: "#FFF",
-        border: "1px solid #ccc",
-        borderRadius: "5px",
-        minWidth: "100px",
-      }}
-    >
-      <input
-        type="text"
-        value={nodeData.label || ""}
-        onChange={handleLabelChange}
-        style={{ width: "100%", marginBottom: "5px", fontWeight: "bold" }}
-        placeholder="Table Name"
-      />
+    <Card className="w-[650px] rounded-xl border-2 border-gray-600 shadow-lg dark:border-gray-500 dark:bg-gray-900 dark:text-gray-300">
+      <CardHeader className="rounded-t-xl bg-gray-200 p-3 dark:bg-gray-800">
+        <CardTitle className="text-lg font-bold text-gray-800 dark:text-gray-100">
+          <Input
+            type="text"
+            value={nodeData.label || ""}
+            onChange={handleLabelChange}
+            className="mb-0 border-0 bg-gray-200 text-xl font-bold transition-all hover:border hover:border-gray-300 focus:border focus:border-gray-400 dark:bg-gray-800 dark:text-gray-100 dark:placeholder-gray-400 dark:hover:border-gray-600 dark:focus:border-gray-500 dark:focus:ring-gray-500"
+            placeholder="Table Name"
+            style={{ fontSize: "1.75rem" }}
+          />
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="p-6">
+        <div className="space-y-5">
+          {(nodeData.columns || []).map((col: string, index: number) => {
+            const { name, definition } = parseColumnString(col);
 
-      <ul style={{ listStyleType: "none", padding: 0, margin: 0 }}>
-        {(nodeData.columns || []).map((col: string, index: number) => {
-          const { name, definition } = parseColumnString(col);
-
-          return (
-            <li key={index} style={{ marginBottom: "5px" }}>
-              <div style={{ display: "flex", gap: "5px" }}>
-                <input
+            return (
+              <div key={index} className="flex gap-3">
+                <Input
                   type="text"
                   value={name}
                   onChange={(e) => {
@@ -149,31 +135,38 @@ function ColorChooserNode({ id, data }: NodeProps<ColorNode>) {
                       `${e.target.value} ${definition}`,
                     );
                   }}
-                  style={{ width: "40%", fontWeight: "bold" }}
+                  className="w-48 border-0 bg-gray-50 text-lg font-medium transition-all hover:border hover:border-gray-300 focus:border focus:border-gray-400 dark:bg-gray-900 dark:text-gray-200 dark:hover:border-gray-600 dark:focus:border-gray-500"
                   placeholder="Field Name"
+                  style={{ fontSize: "1.55rem" }}
                 />
-                <input
+                <Input
                   type="text"
                   value={definition}
                   onChange={(e) => {
                     handleColumnChange(index, `${name} ${e.target.value}`);
                   }}
-                  style={{ width: "60%" }}
+                  className="w-128 border-0 bg-gray-50 text-lg transition-all hover:border hover:border-gray-300 focus:border focus:border-gray-400 dark:bg-gray-900 dark:text-gray-200 dark:hover:border-gray-600 dark:focus:border-gray-500"
                   placeholder="Field Definition"
+                  style={{ fontSize: "1.55rem" }}
                 />
               </div>
-            </li>
-          );
-        })}
-      </ul>
+            );
+          })}
+        </div>
 
-      <div style={{ fontSize: "10px", marginTop: "5px", color: "#666" }}>
-        Relations: {nodeData.hasRelation ? "Yes" : "No"}
-      </div>
+        <Separator className="my-3 bg-gray-300 dark:bg-gray-700" />
+        <Badge
+          variant="outline"
+          className="border-gray-400 text-base text-gray-700 dark:border-gray-600 dark:text-gray-300"
+        >
+          Relations: {nodeData.hasRelation ? "Yes" : "No"}
+        </Badge>
+      </CardContent>
 
-      <Handle type="source" position={Position.Right} id="right" />
-      <Handle type="target" position={Position.Left} id="left" />
-    </div>
+      {/* Enhanced Handles with different visuals */}
+      <SourceHandle position={Position.Right} id="right" />
+      <TargetHandle position={Position.Left} id="left" />
+    </Card>
   );
 }
 
