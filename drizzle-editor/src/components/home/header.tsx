@@ -4,10 +4,10 @@ import {
   Heart,
   GitBranch,
   Code2,
-  Zap,
-  Users,
-  History,
+  Workflow,
+  Settings2,
   DatabaseZap,
+  LogIn,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
@@ -66,7 +66,7 @@ const LandingPage = () => {
 
             {/* Center links */}
             <div className="hidden md:flex items-center gap-7">
-              {["Features", "Docs", "Changelog"].map((l) => (
+              {["Features", "GitHub"].map((l) => (
                 <a
                   key={l}
                   href="#"
@@ -139,9 +139,9 @@ const LandingPage = () => {
               </h1>
 
               <p className="text-[15px] text-neutral-500 dark:text-neutral-400 leading-relaxed max-w-[380px]">
-                Build, visualize, and manage your database schemas with an
-                intuitive canvas. Generate production-ready Drizzle ORM code
-                instantly.
+                Design your database schema on a canvas or in code — and watch
+                both stay perfectly in sync. Drag tables, connect foreign keys,
+                and get production-ready Drizzle ORM code instantly.
               </p>
 
               <div className="flex flex-wrap gap-2.5 pt-2">
@@ -156,7 +156,7 @@ const LandingPage = () => {
                   />
                 </button>
                 <button className="inline-flex items-center gap-2 px-5 py-2.5 rounded-[10px] border border-neutral-300 dark:border-neutral-700 text-[14px] hover:bg-neutral-100 dark:hover:bg-neutral-900 transition">
-                  View docs
+                  View on GitHub
                 </button>
               </div>
             </div>
@@ -260,13 +260,12 @@ const LandingPage = () => {
         </section>
 
         {/* STATS */}
-        {/* STATS */}
         <div className="relative z-10 border-b border-neutral-200 dark:border-neutral-800 grid grid-cols-2 md:grid-cols-4">
           {[
-            { num: "Open", label: "Source" },
-            { num: "Free", label: "Forever" },
-            { num: "99.9%", label: "Uptime" },
-            { num: "8 min", label: "Avg. time to first schema" },
+            { num: "100%", label: "Free & open source" },
+            { num: "AST", label: "Based parsing engine" },
+            { num: "2-way", label: "Code ↔ canvas sync" },
+            { num: ".ts / .png", label: "Export formats" },
           ].map((s, i, arr) => (
             <div
               key={s.label}
@@ -296,32 +295,32 @@ const LandingPage = () => {
                 {
                   icon: <GitBranch size={18} />,
                   title: "Visual canvas",
-                  desc: "Drag, drop, and connect your tables on an infinite canvas. Relationships become obvious at a glance.",
+                  desc: "Drag tables onto an infinite canvas, drag between columns to create foreign keys, and click any table to edit it in detail.",
                 },
                 {
                   icon: <Code2 size={18} />,
-                  title: "Code generation",
-                  desc: "Every canvas change instantly emits type-safe Drizzle ORM code. No hand-writing schemas ever again.",
+                  title: "Bidirectional sync",
+                  desc: "A real AST parser and code generator keep your visual diagram and Drizzle TypeScript code in sync — edit either one, the other updates instantly.",
                 },
                 {
-                  icon: <Zap size={18} />,
-                  title: "Migrations",
-                  desc: "Push changes to your database with generated migration files. Review diffs before applying anything.",
+                  icon: <Settings2 size={18} />,
+                  title: "Full constraint support",
+                  desc: "Primary keys, unique, notNull, defaults, varchar lengths, and foreign key references — all editable visually or in code.",
                 },
                 {
-                  icon: <Users size={18} />,
-                  title: "Team collaboration",
-                  desc: "Share schemas with your team and co-edit in real time. Comments and review flows built in.",
-                },
-                {
-                  icon: <History size={18} />,
-                  title: "Version history",
-                  desc: "Every change is saved. Roll back to any previous version of your schema with one click.",
+                  icon: <Workflow size={18} />,
+                  title: "Auto layout",
+                  desc: "Automatically arrange your tables based on their relationships with one click, and the canvas zooms to fit everything.",
                 },
                 {
                   icon: <DatabaseZap size={18} />,
-                  title: "Import existing DB",
-                  desc: "Connect to your Postgres database and introspect existing tables into the visual editor instantly.",
+                  title: "Import & export",
+                  desc: "Paste or upload an existing Drizzle schema to start editing visually, or export your generated code as a .ts file and your diagram as a PNG.",
+                },
+                {
+                  icon: <LogIn size={18} />,
+                  title: "Saved schemas",
+                  desc: "Sign in with Google or email, and manage all your schemas from a personal dashboard — every change is saved automatically.",
                 },
               ].map((f, i) => (
                 <div
@@ -360,7 +359,7 @@ const LandingPage = () => {
                 />
               </button>
               <button className="inline-flex items-center gap-2 px-5 py-2.5 rounded-[10px] border border-neutral-300 dark:border-neutral-700 text-[14px] hover:bg-neutral-100 dark:hover:bg-neutral-900 transition">
-                See docs
+                View on GitHub
               </button>
             </div>
           </div>
@@ -380,19 +379,19 @@ const LandingPage = () => {
                 </span>
               </div>
               <p className="text-[13px] text-neutral-500 dark:text-neutral-400 leading-relaxed max-w-[200px]">
-                The visual schema editor built for teams who love Drizzle ORM
-                and ship fast. Free and open source.
+                A visual + code hybrid schema editor for Drizzle ORM. Free and
+                open source.
               </p>
             </div>
 
             {[
               {
                 heading: "Product",
-                links: ["Features", "Changelog", "Roadmap"],
+                links: ["Features"],
               },
               {
-                heading: "Developers",
-                links: ["Docs", "API reference", "GitHub", "Discord"],
+                heading: "Developer",
+                links: ["GitHub"],
               },
             ].map((col) => (
               <div key={col.heading}>

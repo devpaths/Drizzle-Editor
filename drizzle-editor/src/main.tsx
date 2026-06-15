@@ -11,11 +11,12 @@ import { ThemeProvider } from "./lib/utils/themeContext";
 
 function Root() {
   const [queryClient] = useState(() => new QueryClient());
+  const TRPC_URL = import.meta.env.VITE_TRPC_URL;
   const [trpcClient] = useState(() =>
     trpc.createClient({
       links: [
         httpBatchLink({
-          url: "http://localhost:4000",
+          url: TRPC_URL,
           async headers() {
             const { data } = await supabase.auth.getSession();
             const token = data.session?.access_token;
